@@ -1,0 +1,56 @@
+[
+ {
+  "directory": "C:/Users/kaluz/Projects/Embedded/baremetal/stm32l4xx_drivers",
+  "arguments": [
+   "arm-none-eabi-gcc",
+   "-c",
+   "-mcpu=cortex-m4",
+   "-mthumb",
+   "-mhard-float",
+   "-mfloat-abi=hard",
+   "-mfpu=fpv4-sp-d16",
+   "-Wall",
+   "-fmessage-length=0",
+   "-ffunction-sections",
+   "-fdata-sections",
+   "-fno-builtin",
+   "-g",
+   "-Os",
+   "-nostdlib",
+   "-I./Inc",
+   "-I./Drivers/Inc",
+   "-DSTM32L476xx",
+   "-o",
+   "Src/nucleo_l476rg_startup.o",
+   "Src/nucleo_l476rg_startup.c"
+  ],
+  "file": "Src/nucleo_l476rg_startup.c"
+ },
+ {
+  "directory": "C:/Users/kaluz/Projects/Embedded/baremetal/stm32l4xx_drivers",
+  "arguments": [
+   "arm-none-eabi-gcc",
+   "-c",
+   "-mcpu=cortex-m4",
+   "-mthumb",
+   "-mhard-float",
+   "-mfloat-abi=hard",
+   "-mfpu=fpv4-sp-d16",
+   "-Wall",
+   "-fmessage-length=0",
+   "-ffunction-sections",
+   "-fdata-sections",
+   "-fno-builtin",
+   "-g",
+   "-Os",
+   "-nostdlib",
+   "-I./Inc",
+   "-I./Drivers/Inc",
+   "-DSTM32L476xx",
+   "-o",
+   "Src/main.o",
+   "Src/main.c"
+  ],
+  "file": "Src/main.c"
+ }
+]
