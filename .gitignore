@@ -4,3 +4,11 @@
 *.bin
 *.map
 *.cache*
+
+*.settings*
+
+STM32CubeIDE_baremetal_workspace*
+stm32l071cbt6-blink*
+*.launch*
+*.cproject*
+*.project*
