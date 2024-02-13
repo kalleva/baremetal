@@ -54,7 +54,30 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle) {
         ~(0x3 << (2 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber));
     pGPIOHandle->pGPIOx->MODER |= temp;
   } else {
-    /* Interrupt mode */
+
+    if (pGPIOHandle->GPIO_PinConfig.GPIO_PinMode == GPIO_MODE_IT_FT) {
+      EXTI->FTSR1 |= (1 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
+      EXTI->RTSR1 &= ~(1 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
+    }
+
+    if (pGPIOHandle->GPIO_PinConfig.GPIO_PinMode == GPIO_MODE_IT_RT) {
+      EXTI->FTSR1 &= ~(1 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
+      EXTI->RTSR1 |= (1 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
+    }
+
+    if (pGPIOHandle->GPIO_PinConfig.GPIO_PinMode == GPIO_MODE_IT_RFT) {
+      EXTI->FTSR1 |= (1 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
+      EXTI->RTSR1 |= (1 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
+    }
+
+    uint8_t q = pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber / 4;
+    uint8_t r = pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber % 4;
+    uint8_t portcode = GPIO_BASEADDR_TO_CODE(pGPIOHandle->pGPIOx);
+    SYSCFG_PCLK_EN();
+    SYSCFG->EXTICR[q] = (portcode << 4 * r);
+
+    /* Unmask EXTI line */
+    EXTI->IMR1 |= (1 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
   }
 
   /* 2. Configure speed */
@@ -90,6 +113,7 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle) {
         pGPIOHandle->GPIO_PinConfig.GPIO_PinAltFunMode << (4 * temp2);
   }
 }
+
 void GPIO_DeInit(GPIO_RegDef_t *pGPIOx) {
   if (pGPIOx == GPIOA) {
     GPIOA_REG_RESET();
@@ -137,5 +161,25 @@ void GPIO_ToggleOutputPin(GPIO_RegDef_t *pGPIOx, uint8_t GPIO_PinNumber) {
   pGPIOx->ODR ^= 1 << GPIO_PinNumber;
 }
 
-void GPIO_IRQConfig(uint8_t IRQNumber, uint8_t IRQPriority, uint8_t EnorDi) {}
+void GPIO_IRQConfig(uint8_t IRQNumber, uint8_t IRQPriority, uint8_t EnorDi) {
+  /* From Cortex-M4 Generic User Guide */
+  if (EnorDi == ENABLE) {
+    if (IRQNumber < 32) {
+      /* ISER0 register */
+    } else if (IRQNumber >= 32 && IRQNumber < 64) {
+      /* ISER1 register */
+    } else if (IRQNumber >= 64 && IRQNumber < 96) {
+      /* ISER2 register */
+    }
+  } else {
+    if (IRQNumber < 32) {
+      /* ICER0 register */
+    } else if (IRQNumber >= 32 && IRQNumber < 64) {
+      /* ICER1 register */
+    } else if (IRQNumber >= 64 && IRQNumber < 96) {
+      /* ICER2 register */
+    }
+  }
+}
+
 void GPIO_IRQHandling(uint8_t GPIO_PinNumber) {}

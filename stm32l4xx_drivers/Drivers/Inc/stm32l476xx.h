@@ -3,6 +3,7 @@
 
 /* Base addresses of FLASH, SRAM and ROM */
 
+#include "stm32l476xx.h"
 #include <stdint.h>
 
 #define FLASH1_BASEADDR 0x08000000U
@@ -115,6 +116,32 @@ typedef struct GPIO_RegDef_s {
   volatile uint32_t ASCR;
 } GPIO_RegDef_t;
 
+typedef struct EXTI_RegDef_s {
+  volatile uint32_t IMR1;
+  volatile uint32_t EMR1;
+  volatile uint32_t RTSR1;
+  volatile uint32_t FTSR1;
+  volatile uint32_t SWIER1;
+  volatile uint32_t PR1;
+  volatile uint32_t EXTI_RESERVED1[2];
+  volatile uint32_t IMR2;
+  volatile uint32_t EMR2;
+  volatile uint32_t RTSR2;
+  volatile uint32_t FTSR2;
+  volatile uint32_t SWIER2;
+  volatile uint32_t PR2;
+} EXTI_RegDef_t;
+
+typedef struct SYSCFG_RegDef_s {
+  volatile uint32_t MEMRMP;
+  volatile uint32_t CFGR1;
+  volatile uint32_t EXTICR[4];
+  volatile uint32_t SCSR;
+  volatile uint32_t CFGR2;
+  volatile uint32_t SWPR;
+  volatile uint32_t SKR;
+} SYSCFG_RegDef_t;
+
 /* Peripheral definitions */
 
 #define RCC ((RCC_RegDef_t *)RCC_BASEADDR)
@@ -127,6 +154,10 @@ typedef struct GPIO_RegDef_s {
 #define GPIOF ((GPIO_RegDef_t *)GPIOF_BASEADDR)
 #define GPIOG ((GPIO_RegDef_t *)GPIOG_BASEADDR)
 #define GPIOH ((GPIO_RegDef_t *)GPIOH_BASEADDR)
+
+#define EXTI ((EXTI_RegDef_t *)EXTI_BASEADDR)
+
+#define SYSCFG ((SYSCFG_RegDef_t *)SYSCFG_BASEADDR)
 
 /* GPIO peripheral clock Enable */
 
@@ -254,6 +285,27 @@ typedef struct GPIO_RegDef_s {
 #define RESET DISABLE
 #define GPIO_PIN_SET SET
 #define GPIO_PIN_RESET RESET
+
+#define GPIO_BASEADDR_TO_CODE(x)                                               \
+  ((x == GPIOA)   ? 0                                                          \
+   : (x == GPIOB) ? 1                                                          \
+   : (x == GPIOC) ? 2                                                          \
+   : (x == GPIOD) ? 3                                                          \
+   : (x == GPIOE) ? 4                                                          \
+   : (x == GPIOF) ? 5                                                          \
+   : (x == GPIOH) ? 6                                                          \
+   : (x == GPIOG) ? 7                                                          \
+                  : 0)
+
+/* Interrupts */
+
+#define IRQ_NO_EXTI0 6
+#define IRQ_NO_EXTI1 7
+#define IRQ_NO_EXTI2 8
+#define IRQ_NO_EXTI3 9
+#define IRQ_NO_EXTI4 10
+#define IRQ_NO_EXTI9_5 23
+#define IRQ_NO_EXTI15_10 40
 
 #include "stm32l476xx_gpio_driver.h"
 
