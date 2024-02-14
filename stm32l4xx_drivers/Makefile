@@ -43,7 +43,7 @@ DEFINE += -DSTM32L476xx
 
 C_SRC += ./Drivers/Src/stm32l476xx_gpio_driver.c
 C_SRC += ./Src/nucleo_l476rg_startup.c
-C_SRC += ./Src/003LEDToggleButton.c
+C_SRC += ./Src/004LEDToggleIT.c
 
 OBJS += $(C_SRC:.c=.o)
 

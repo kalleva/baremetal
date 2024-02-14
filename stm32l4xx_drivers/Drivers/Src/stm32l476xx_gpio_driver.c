@@ -54,6 +54,11 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle) {
         ~(0x3 << (2 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber));
     pGPIOHandle->pGPIOx->MODER |= temp;
   } else {
+    temp = (pGPIOHandle->GPIO_PinConfig.GPIO_PinMode
+            << (2 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber));
+    pGPIOHandle->pGPIOx->MODER &=
+        ~(0x3 << (2 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber));
+    pGPIOHandle->pGPIOx->MODER |= temp;
 
     if (pGPIOHandle->GPIO_PinConfig.GPIO_PinMode == GPIO_MODE_IT_FT) {
       EXTI->FTSR1 |= (1 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
@@ -161,25 +166,42 @@ void GPIO_ToggleOutputPin(GPIO_RegDef_t *pGPIOx, uint8_t GPIO_PinNumber) {
   pGPIOx->ODR ^= 1 << GPIO_PinNumber;
 }
 
-void GPIO_IRQConfig(uint8_t IRQNumber, uint8_t IRQPriority, uint8_t EnorDi) {
+void GPIO_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnorDi) {
   /* From Cortex-M4 Generic User Guide */
   if (EnorDi == ENABLE) {
     if (IRQNumber < 32) {
       /* ISER0 register */
+      *NVIC_ISER0 |= (1 << IRQNumber);
     } else if (IRQNumber >= 32 && IRQNumber < 64) {
       /* ISER1 register */
+      *NVIC_ISER1 |= (1 << IRQNumber % 32);
     } else if (IRQNumber >= 64 && IRQNumber < 96) {
       /* ISER2 register */
+      *NVIC_ISER1 |= (1 << IRQNumber % 64);
     }
   } else {
     if (IRQNumber < 32) {
       /* ICER0 register */
+      *NVIC_ICER0 |= (1 << IRQNumber);
     } else if (IRQNumber >= 32 && IRQNumber < 64) {
       /* ICER1 register */
+      *NVIC_ICER1 |= (1 << IRQNumber % 32);
     } else if (IRQNumber >= 64 && IRQNumber < 96) {
       /* ICER2 register */
+      *NVIC_ICER1 |= (1 << IRQNumber % 64);
     }
   }
 }
 
-void GPIO_IRQHandling(uint8_t GPIO_PinNumber) {}
+void GPIO_IRQPriorityConfig(uint8_t IRQNumber, uint32_t IRQPriority) {
+  uint32_t iprx = IRQNumber / 4;
+  uint8_t iprx_section = IRQNumber % 4;
+  uint8_t shift_amount = (8 * iprx_section) + (8 - NO_PR_BITS_IMPLEMENTED);
+  *(NVIC_PR_BASE_ADDR + iprx) |= (IRQPriority << shift_amount);
+}
+
+void GPIO_IRQHandling(uint8_t PinNumber) {
+  if (EXTI->PR1 & (1 << PinNumber)) {
+    EXTI->PR1 |= (1 << PinNumber);
+  }
+}

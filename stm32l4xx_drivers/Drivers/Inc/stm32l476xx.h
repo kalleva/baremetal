@@ -1,11 +1,29 @@
 #ifndef STM32L476XX_H__
 #define STM32L476XX_H__
 
-/* Base addresses of FLASH, SRAM and ROM */
-
-#include "stm32l476xx.h"
 #include <stdint.h>
 
+/* ARM Cortex Mx NVIC ISERx register addresses */
+
+#define NVIC_ISER0 ((volatile uint32_t *)0xE000E100)
+#define NVIC_ISER1 ((volatile uint32_t *)0xE000E104)
+#define NVIC_ISER2 ((volatile uint32_t *)0xE000E108)
+#define NVIC_ISER3 ((volatile uint32_t *)0xE000E10C)
+
+/* ARM Cortex Mx NVIC ICERx register addresses */
+
+#define NVIC_ICER0 ((volatile uint32_t *)0xE000E180)
+#define NVIC_ICER1 ((volatile uint32_t *)0xE000E184)
+#define NVIC_ICER2 ((volatile uint32_t *)0xE000E188)
+#define NVIC_ICER3 ((volatile uint32_t *)0xE000E18C)
+
+/* ARM Cortex Mx NVIC Priority register addresses */
+
+#define NVIC_PR_BASE_ADDR ((volatile uint32_t *)0xE000E400)
+
+#define NO_PR_BITS_IMPLEMENTED 4
+
+/* Base addresses of FLASH, SRAM and ROM */
 #define FLASH1_BASEADDR 0x08000000U
 #define FLASH2_BASEADDR 0x08080000U
 #define FLASH FLASH1_BASEADDR
@@ -306,6 +324,23 @@ typedef struct SYSCFG_RegDef_s {
 #define IRQ_NO_EXTI4 10
 #define IRQ_NO_EXTI9_5 23
 #define IRQ_NO_EXTI15_10 40
+
+#define NVIC_IRQ_PRI0 0
+#define NVIC_IRQ_PRI1 1
+#define NVIC_IRQ_PRI2 2
+#define NVIC_IRQ_PRI3 3
+#define NVIC_IRQ_PRI4 4
+#define NVIC_IRQ_PRI5 5
+#define NVIC_IRQ_PRI6 6
+#define NVIC_IRQ_PRI7 7
+#define NVIC_IRQ_PRI8 8
+#define NVIC_IRQ_PRI9 9
+#define NVIC_IRQ_PRI10 10
+#define NVIC_IRQ_PRI11 11
+#define NVIC_IRQ_PRI12 12
+#define NVIC_IRQ_PRI13 13
+#define NVIC_IRQ_PRI14 14
+#define NVIC_IRQ_PRI15 15
 
 #include "stm32l476xx_gpio_driver.h"
 
