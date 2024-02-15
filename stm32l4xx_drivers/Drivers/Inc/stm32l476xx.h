@@ -1,6 +1,7 @@
 #ifndef STM32L476XX_H__
 #define STM32L476XX_H__
 
+#include "stm32l476xx.h"
 #include <stdint.h>
 
 /* ARM Cortex Mx NVIC ISERx register addresses */
@@ -160,6 +161,16 @@ typedef struct SYSCFG_RegDef_s {
   volatile uint32_t SKR;
 } SYSCFG_RegDef_t;
 
+typedef struct SPI_RegDef_s {
+  volatile uint32_t CR1;
+  volatile uint32_t CR2;
+  volatile uint32_t SR;
+  volatile uint32_t DR;
+  volatile uint32_t CRCPR;
+  volatile uint32_t RXCRCR;
+  volatile uint32_t TXCRCR;
+} SPI_RegDef_t;
+
 /* Peripheral definitions */
 
 #define RCC ((RCC_RegDef_t *)RCC_BASEADDR)
@@ -176,6 +187,10 @@ typedef struct SYSCFG_RegDef_s {
 #define EXTI ((EXTI_RegDef_t *)EXTI_BASEADDR)
 
 #define SYSCFG ((SYSCFG_RegDef_t *)SYSCFG_BASEADDR)
+
+#define SPI1 ((SPI_RegDef_t *)SPI1_BASEADDR)
+#define SPI2 ((SPI_RegDef_t *)SPI2_BASEADDR)
+#define SPI3 ((SPI_RegDef_t *)SPI3_BASEADDR)
 
 /* GPIO peripheral clock Enable */
 
@@ -196,9 +211,9 @@ typedef struct SYSCFG_RegDef_s {
 
 /* SPI peripheral clock Enable */
 
-#define SPI1_PCLK_EN() (RCC->APB2ENR |= (1 << 12));
-#define SPI2_PCLK_EN() (RCC->APB1ENR |= (1 << 14));
-#define SPI3_PCLK_EN() (RCC->APB1ENR |= (1 << 15));
+#define SPI1_PCLK_EN() (RCC->APB2ENR |= (1 << 12))
+#define SPI2_PCLK_EN() (RCC->APB1ENR1 |= (1 << 14))
+#define SPI3_PCLK_EN() (RCC->APB1ENR1 |= (1 << 15))
 
 /* UART peripheral clock Enable */
 
@@ -231,9 +246,9 @@ typedef struct SYSCFG_RegDef_s {
 
 /* SPI peripheral clock Disable */
 
-#define SPI1_PCLK_DI() (RCC->APB2ENR &= ~(1 << 12));
-#define SPI2_PCLK_DI() (RCC->APB1ENR &= ~(1 << 14));
-#define SPI3_PCLK_DI() (RCC->APB1ENR &= ~(1 << 15));
+#define SPI1_PCLK_DI() (RCC->APB2ENR &= ~(1 << 12))
+#define SPI2_PCLK_DI() (RCC->APB1ENR1 &= ~(1 << 14))
+#define SPI3_PCLK_DI() (RCC->APB1ENR1 &= ~(1 << 15))
 
 /* UART peripheral clock Disable */
 
@@ -297,12 +312,32 @@ typedef struct SYSCFG_RegDef_s {
     (RCC->AHB2RSTR &= ~(1 << 7));                                              \
   } while (0)
 
+#define SPI1_REG_RESET()                                                       \
+  do {                                                                         \
+    (RCC->APB2RSTR |= (1 << 12));                                              \
+    (RCC->APB2RSTR &= ~(1 << 12));                                             \
+  } while (0)
+
+#define SPI2_REG_RESET()                                                       \
+  do {                                                                         \
+    (RCC->APB1RSTR1 |= (1 << 14));                                             \
+    (RCC->APB1RSTR1 &= ~(1 << 14));                                            \
+  } while (0)
+
+#define SPI3_REG_RESET()                                                       \
+  do {                                                                         \
+    (RCC->APB1RSTR1 |= (1 << 15));                                             \
+    (RCC->APB1RSTR1 &= ~(1 << 15));                                            \
+  } while (0)
+
 #define ENABLE 1
 #define DISABLE 0
 #define SET ENABLE
 #define RESET DISABLE
 #define GPIO_PIN_SET SET
 #define GPIO_PIN_RESET RESET
+#define FLAG_RESET RESET
+#define FLAG_SET SET
 
 #define GPIO_BASEADDR_TO_CODE(x)                                               \
   ((x == GPIOA)   ? 0                                                          \
@@ -343,5 +378,6 @@ typedef struct SYSCFG_RegDef_s {
 #define NVIC_IRQ_PRI15 15
 
 #include "stm32l476xx_gpio_driver.h"
+#include "stm32l476xx_spi_driver.h"
 
 #endif /* STM32L476XX_H__ */
