@@ -285,7 +285,7 @@ static void spi_transmit(uint8_t *buffer, uint32_t len) {
   /* Disable SPI */
   /* Wait while Transmit queue is empty FTLVL 0b00 */
   /* Wait for BUSY 0*/
-  while (!(SPI1->SR & (SPI_SR_FTLVL | SPI_SR_BSY)))
+  while ((SPI1->SR & (SPI_SR_FTLVL | SPI_SR_BSY)))
     ;
   SPI1->CR1 &= ~SPI_CR1_SPE;
 }
