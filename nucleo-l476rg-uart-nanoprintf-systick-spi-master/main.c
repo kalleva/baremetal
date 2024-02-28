@@ -31,7 +31,6 @@ volatile uint32_t ticks = 0;
 
 int main(void) {
   clock_config();
-  // led_config();
   mco_config();
   uart_config();
   spi_config();
@@ -42,7 +41,6 @@ int main(void) {
 
   char buf[32];
   while (1) {
-    led_toggle();
     int len = npf_snprintf(buf, sizeof(buf), "[%lu]%s, %s!\r\n", ticks, "Hello",
                            "World");
     uart_transmit(buf, len);
@@ -113,6 +111,7 @@ static void clock_config(void) {
 }
 
 static void led_config(void) {
+  // TODO: OpenDrain
   /* Configure LED PA5 PIN */
   RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;
 
@@ -192,30 +191,29 @@ static void spi_config(void) {
   GPIOA->MODER &= ~(GPIO_MODER_MODE4 | GPIO_MODER_MODE5 | GPIO_MODER_MODE6 |
                     GPIO_MODER_MODE7);
 
-  /* Alternate function 0xb10 */
-  GPIOA->MODER |= (GPIO_MODER_MODE4_1 | GPIO_MODER_MODE5_1 |
+  /* Output for pin 4, Alternate function for pins 5, 6, 7, 0xb10 */
+  GPIOA->MODER |= (GPIO_MODER_MODE4_0 | GPIO_MODER_MODE5_1 |
                    GPIO_MODER_MODE6_1 | GPIO_MODER_MODE7_1);
 
   /* Configure output pins as output push-pull */
-
   GPIOA->OTYPER &=
       ~(GPIO_OTYPER_OT4 | GPIO_OTYPER_OT5 | GPIO_OTYPER_OT6 | GPIO_OTYPER_OT7);
 
   /* Configure pins as no pull-up no pull-down */
-
   GPIOA->PUPDR &= ~(GPIO_PUPDR_PUPD4 | GPIO_PUPDR_PUPD5 | GPIO_PUPDR_PUPD6 |
                     GPIO_PUPDR_PUPD7);
 
   /* Configure alternate function register to set mode 5 for these pins */
 
-  GPIOA->AFR[0] &= ~(GPIO_AFRL_AFSEL4 | GPIO_AFRL_AFSEL5 | GPIO_AFRL_AFSEL6 |
-                     GPIO_AFRL_AFSEL7);
+  GPIOA->AFR[0] &= ~(GPIO_AFRL_AFSEL5 | GPIO_AFRL_AFSEL6 | GPIO_AFRL_AFSEL7);
 
   /* AF5 0b0101 */
   GPIOA->AFR[0] |=
-      (GPIO_AFRL_AFSEL4_2 | GPIO_AFRL_AFSEL4_0 | GPIO_AFRL_AFSEL5_2 |
-       GPIO_AFRL_AFSEL5_0 | GPIO_AFRL_AFSEL6_2 | GPIO_AFRL_AFSEL6_0 |
-       GPIO_AFRL_AFSEL7_2 | GPIO_AFRL_AFSEL7_0);
+      (GPIO_AFRL_AFSEL5_2 | GPIO_AFRL_AFSEL5_0 | GPIO_AFRL_AFSEL6_2 |
+       GPIO_AFRL_AFSEL6_0 | GPIO_AFRL_AFSEL7_2 | GPIO_AFRL_AFSEL7_0);
+
+  /* Put CS High */
+  GPIOA->ODR |= GPIO_ODR_OD4;
 
   /* Enable SPI clock */
   RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;
@@ -224,7 +222,7 @@ static void spi_config(void) {
   uint32_t reg = 0;
 
   /* 2.1 Configure clock baud rate with BR bits */
-  /* System clock is 80 MHz */
+  /* System clock is 64 MHz -> Divide by 32 0b100 */
   reg |= SPI_CR1_BR_2;
 
   /* 2.2 Configure CPOL and CPHA bits */
@@ -243,7 +241,8 @@ static void spi_config(void) {
   /* Not using CRC and CRCEN */
 
   /* 2.6 Configure SSM and SSI  */
-  /* Use hardware slave select so both of these are 0 */
+  /* Use software slave select so both of these are 1 */
+  reg |= SPI_CR1_SSM | SPI_CR1_SSI;
 
   /* 2.7 Configure MSTR bit */
   reg |= SPI_CR1_MSTR;
@@ -259,15 +258,17 @@ static void spi_config(void) {
 
   /* 3.2 Configure SSOE */
   /* Hardware slave select so SSOE bit is 1 */
-  reg |= SPI_CR2_SSOE;
+  /* reg |= SPI_CR2_SSOE; */
 
   /* 3.3 Configure NSSP */
-  reg |= SPI_CR2_NSSP;
+  /* reg |= SPI_CR2_NSSP; */
 
   SPI1->CR2 = reg;
 }
 
 static void spi_transmit(uint8_t *buffer, uint32_t len) {
+  /* Select CS by driving it LOW */
+  GPIOA->ODR &= ~GPIO_ODR_OD4;
   /* Enable SPI */
   SPI1->CR1 |= SPI_CR1_SPE;
 
@@ -279,7 +280,10 @@ static void spi_transmit(uint8_t *buffer, uint32_t len) {
       ;
 
     /* Transmit data one char at a time */
-    SPI1->DR = *buffer++;
+    /* There is a problem with that SPI trasmitting 16 bits instead of 8 */
+    /* This forces SPI to transmit 8 bits, and not transmit empty byte each time
+     */
+    *((volatile uint8_t *)&SPI1->DR) = *buffer++;
   }
 
   /* Disable SPI */
@@ -288,6 +292,9 @@ static void spi_transmit(uint8_t *buffer, uint32_t len) {
   while ((SPI1->SR & (SPI_SR_FTLVL | SPI_SR_BSY)))
     ;
   SPI1->CR1 &= ~SPI_CR1_SPE;
+
+  /* Dselect CS by driving it HIGH */
+  GPIOA->ODR |= GPIO_ODR_OD4;
 }
 
 static int uart_transmit(char *data, int size) {
