@@ -1,0 +1,1 @@
+Sends word ```PING``` over SPI each second with SCK clocking at 500kHz
