@@ -29,7 +29,7 @@ void uart_config(void) {
   /* Configuration of baudrate 9600
   For oversampling 16x:
   USARTDIV = 32MHz / 9600 baud */
-  uint16_t usart_div = SYSTEM_CLOCK / (2 * 9600);
+  uint16_t usart_div = SYSTEM_CLOCK / (9600);
   USART2->BRR = usart_div;
   /* Enable UART and TX over UART */
   USART2->CR1 |= USART_CR1_UE | USART_CR1_TE;

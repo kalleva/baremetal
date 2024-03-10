@@ -1,4 +1,6 @@
 #include "spi.h"
+#include "stm32f411xe.h"
+#include <stdint.h>
 
 void spi_config(void) {
   /* 1. Configure GPIO pins */
@@ -77,37 +79,30 @@ void spi_config(void) {
   /* 3. Configure SPI_CR2 register */
 
   /* 3.1 Configure SSOE */
-  /* SW slave select so SSOE bit is 0 */
-  // reg |= SPI_CR2_SSOE;
+  /* Manual slave select so SSOE bit is 0 */
 
   SPI1->CR2 = reg;
 }
 
-void spi_transmit(uint8_t *buffer, uint32_t len) {
-
-  /* Enable SPI */
-  /* Select CS by driving it LOW */
-  GPIOA->ODR &= ~GPIO_ODR_OD4;
-
-  /* Transmit */
-  uint32_t count = len;
+void spi_transmit_receive(uint8_t *tx_buffer, uint32_t tx_length,
+                          uint8_t *rx_buffer, uint32_t rx_length) {
+  uint32_t count = tx_length;
   while (count--) {
-    /* Wait until Tx buffer is empty */
     while (!(SPI1->SR & SPI_SR_TXE))
       ;
+    *((uint8_t *)&(SPI1->DR)) = *tx_buffer++;
 
-    /* Transmit data one char at a time */
-    SPI1->DR = *buffer++;
+    while (!(SPI1->SR & SPI_SR_RXNE))
+      ;
+    *rx_buffer++ = *((uint8_t *)&(SPI1->DR));
   }
 
-  /* Disable SPI */
-  /* Wait while Transmit queue is empty FTLVL 0b00 */
-  /* Wait for BUSY 0*/
-  while (SPI1->SR & SPI_SR_BSY)
+  /* Wait first for TXE */
+  while (!(SPI1->SR & SPI_SR_TXE))
     ;
 
-  // SPI1->CR1 &= ~SPI_CR1_SPE;
-
-  /* Dselect CS by driving it HIGH */
-  GPIOA->ODR |= GPIO_ODR_OD4;
+  /* And only after that wait for BSY */
+  /* Without this last byte of transmisson is not received */
+  while (SPI1->SR & SPI_SR_BSY)
+    ;
 }

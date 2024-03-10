@@ -4,6 +4,7 @@
 #include "spi.h"
 #include "system.h"
 #include "uart.h"
+#include <stdint.h>
 
 int main(void) {
   clock_config();
@@ -15,11 +16,15 @@ int main(void) {
   SysTick_Config(16000);
   __enable_irq();
   spi_enable();
-
+  uint8_t tx_buffer[8] = "PINGCRAP";
+  uint8_t rx_buffer[8] = {0};
+  spi_enable();
   while (1) {
     led_toggle();
-    uart_transmit("TEST\r\n", 6);
-    spi_transmit((uint8_t *)"PING", 4);
+    spi_chip_select();
+    spi_transmit_receive(tx_buffer, 8, rx_buffer, 8);
+    spi_chip_deselect();
+    uart_transmit((char *)rx_buffer, 8);
     delay_ms(1000);
   }
 }

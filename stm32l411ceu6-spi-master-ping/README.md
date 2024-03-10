@@ -1,1 +1,1 @@
-Sends word ```PING``` over SPI each second with SCK clocking at 500kHz
+Sends word ```PING``` over SPI each second with SCK clocking at 500kHz works in congunction with **nucleo-l476rg-spi-slave-pong** app that will reply with ```PONG```
