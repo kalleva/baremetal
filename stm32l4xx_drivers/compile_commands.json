@@ -48,9 +48,63 @@
    "-I./Drivers/Inc",
    "-DSTM32L476xx",
    "-o",
-   "Src/main.o",
-   "Src/main.c"
+   "Drivers/Src/stm32l476xx_gpio_driver.o",
+   "Drivers/Src/stm32l476xx_gpio_driver.c"
   ],
-  "file": "Src/main.c"
+  "file": "Drivers/Src/stm32l476xx_gpio_driver.c"
+ },
+ {
+  "directory": "C:/Users/kaluz/Projects/Embedded/baremetal/stm32l4xx_drivers",
+  "arguments": [
+   "arm-none-eabi-gcc",
+   "-c",
+   "-mcpu=cortex-m4",
+   "-mthumb",
+   "-mhard-float",
+   "-mfloat-abi=hard",
+   "-mfpu=fpv4-sp-d16",
+   "-Wall",
+   "-fmessage-length=0",
+   "-ffunction-sections",
+   "-fdata-sections",
+   "-fno-builtin",
+   "-g",
+   "-Os",
+   "-nostdlib",
+   "-I./Inc",
+   "-I./Drivers/Inc",
+   "-DSTM32L476xx",
+   "-o",
+   "Drivers/Src/stm32l476xx_spi_driver.o",
+   "Drivers/Src/stm32l476xx_spi_driver.c"
+  ],
+  "file": "Drivers/Src/stm32l476xx_spi_driver.c"
+ },
+ {
+  "directory": "C:/Users/kaluz/Projects/Embedded/baremetal/stm32l4xx_drivers",
+  "arguments": [
+   "arm-none-eabi-gcc",
+   "-c",
+   "-mcpu=cortex-m4",
+   "-mthumb",
+   "-mhard-float",
+   "-mfloat-abi=hard",
+   "-mfpu=fpv4-sp-d16",
+   "-Wall",
+   "-fmessage-length=0",
+   "-ffunction-sections",
+   "-fdata-sections",
+   "-fno-builtin",
+   "-g",
+   "-Os",
+   "-nostdlib",
+   "-I./Inc",
+   "-I./Drivers/Inc",
+   "-DSTM32L476xx",
+   "-o",
+   "Src/006SPITxNSS.o",
+   "Src/006SPITxNSS.c"
+  ],
+  "file": "Src/006SPITxNSS.c"
  }
 ]

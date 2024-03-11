@@ -113,7 +113,25 @@ void SPI_SSOEConfig(SPI_RegDef_t *pSPIx, uint8_t EnorDi) {
     pSPIx->CR2 &= ~(1 << SPI_CR2_SSOE);
   }
 }
-void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t len) {}
+void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t len) {
+  while (len > 0) {
+    while (SPI_GetFlagStatus(pSPIx, SPI_RXNE_FLAG) == FLAG_RESET)
+      ;
+
+    /* Only for 16 or 8 bit DS */
+    if (((pSPIx->CR2 >> SPI_CR2_DS) & 0xF) == SPI_DS_16) {
+      /* 16 bit */
+      *((uint16_t *)pRxBuffer) = pSPIx->DR;
+      len -= 2;
+      (uint16_t *)pRxBuffer++;
+    } else {
+      /* 8 bit */
+      *pRxBuffer = pSPIx->DR;
+      len--;
+      pRxBuffer++;
+    }
+  }
+}
 
 void SPI_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnorDi) {}
 void SPI_IRQPriorityConfig(uint8_t IRQNumber, uint32_t IRQPriority) {}
