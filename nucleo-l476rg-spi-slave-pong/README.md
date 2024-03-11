@@ -1,0 +1,1 @@
+Replies with word ```PONG``` to ```PING``` from **stm32l411ceu6-spi-master-ping**
