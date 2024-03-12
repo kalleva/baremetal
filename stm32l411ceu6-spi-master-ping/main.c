@@ -15,7 +15,6 @@ int main(void) {
   /* 16MHz 1KHz firing requency (each ms) */
   SysTick_Config(16000);
   __enable_irq();
-  spi_enable();
   uint8_t tx_buffer[8] = "PINGCRAP";
   uint8_t rx_buffer[8] = {0};
   spi_enable();
